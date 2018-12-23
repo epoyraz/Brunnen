@@ -42,7 +42,7 @@ sortByDistance(array) {
   });
 }
 
-  sortbydistance(cLat, cLon, coordinates) {
+  calculatedistances(cLat, cLon, coordinates) {
     coordinates.forEach(coordinate => {
       var aLon = this.roundToSeven(coordinate.geometry.coordinates[0]);
       var aLat = this.roundToSeven(coordinate.geometry.coordinates[1]);
@@ -67,7 +67,7 @@ sortByDistance(array) {
           longitude: position.coords.longitude,
           error: null,
         });
-        this.state.features = this.sortbydistance(this.state.latitude, this.state.longitude, data.features);
+        this.state.features = this.calculatedistances(this.state.latitude, this.state.longitude, data.features);
       },
       (error) => this.setState({ error: error.message }),
       { enableHighAccuracy: true, timeout: 20000, maximumAge: 1000 },
