@@ -9,6 +9,7 @@ import {
   Image
 } from 'react-native';
 var data = require('../data/brunnen.json');
+var geodist = require("geodist");
 
 export default class HomeScreen extends React.Component {
   static navigationOptions = {
@@ -22,7 +23,40 @@ export default class HomeScreen extends React.Component {
       latitude: null,
       longitude: null,
       error: null,
+      features: data.features,
     };
+  }
+
+roundToSeven(num) {    
+    return +(Math.round(num + "e+7")  + "e-7");
+}
+
+roundToOne(num) {    
+  return +(Math.round(num + "e+1")  + "e-1");
+}
+
+sortByDistance(array) {
+  return array.sort(function(a, b) {
+      var x = a.geometry.distance; var y = b.geometry.distance;
+      return ((x < y) ? -1 : ((x > y) ? 1 : 0));
+  });
+}
+
+  sortbydistance(cLat, cLon, coordinates) {
+    coordinates.forEach(coordinate => {
+      var aLon = this.roundToSeven(coordinate.geometry.coordinates[0]);
+      var aLat = this.roundToSeven(coordinate.geometry.coordinates[1]);
+      var dist = geodist(
+        { lat: cLat, lon: cLon },
+        { lat: aLat, lon: aLon },
+        {exact: true, unit: 'meters'}
+      );
+      var dist = this.roundToOne(dist);
+      coordinate.geometry.distance = dist;
+    });
+    var sorted = this.sortByDistance(coordinates);
+    console.log(sorted);
+    return sorted;
   }
 
   componentDidMount() {
@@ -33,6 +67,7 @@ export default class HomeScreen extends React.Component {
           longitude: position.coords.longitude,
           error: null,
         });
+        this.state.features = this.sortbydistance(this.state.latitude, this.state.longitude, data.features);
       },
       (error) => this.setState({ error: error.message }),
       { enableHighAccuracy: true, timeout: 20000, maximumAge: 1000 },
@@ -49,7 +84,7 @@ export default class HomeScreen extends React.Component {
         {this.state.error ? <Text>Error: {this.state.error}</Text> : null}
       </View>
         <FlatList
-          data={data.features}
+          data={this.state.features}
           showsVerticalScrollIndicator={false}
           renderItem={({item}) =>
           <View style={styles.flatview}>
@@ -62,6 +97,7 @@ export default class HomeScreen extends React.Component {
             <Text style= {{fontSize: 18}}>{item.properties.bezeichnung}</Text>
             <Text>{item.properties.historisches_baujahr}</Text>
             <Text>{item.properties.wasserart_txt}</Text>
+            <Text>{item.geometry.distance}</Text>
         </View>
           </View>
           }
