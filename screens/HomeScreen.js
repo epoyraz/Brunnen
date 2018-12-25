@@ -55,7 +55,6 @@ sortByDistance(array) {
       coordinate.geometry.distance = dist;
     });
     var sorted = this.sortByDistance(coordinates);
-    console.log(sorted);
     return sorted;
   }
 
@@ -67,6 +66,8 @@ sortByDistance(array) {
           longitude: position.coords.longitude,
           error: null,
         });
+        console.log(this.state.latitude);
+        console.log(this.state.longitude);
         this.state.features = this.calculatedistances(this.state.latitude, this.state.longitude, data.features);
       },
       (error) => this.setState({ error: error.message }),
@@ -77,28 +78,34 @@ sortByDistance(array) {
   render() {
     return (
       <View style={styles.container}>
+            <View >
+                <View style={styles.tempNav} >
+                    <Text style={styles.hText}>Brunnen</Text>
+                    <Image style={styles.hImage} source = {require('../assets/info.png')} />
+                </View>
+            </View>
         <ScrollView style={styles.container} contentContainerStyle={styles.contentContainer}>
-        <View style={{ flexGrow: 1, alignItems: 'center', justifyContent: 'center' }}>
-        <Text>Latitude: {this.state.latitude}</Text>
-        <Text>Longitude: {this.state.longitude}</Text>
-        {this.state.error ? <Text>Error: {this.state.error}</Text> : null}
+        <View style={{ alignItems: 'center', justifyContent: 'center' }}>
       </View>
         <FlatList
-          data={this.state.features}
+          data={data.features}
           showsVerticalScrollIndicator={false}
+          initialNumToRender={50}
+          maxToRenderPerBatch={200}
           renderItem={({item}) =>
           <View style={styles.flatview}>
-                  <Image 
-         source={{uri: "https://www.suedtirolerland.it/images/cms/100x100/1309185237D_IMG_6024_Brunnen_dreiQuellen.JPG"}}
-         style={{ width:100, height: 100, margin: 5}}
-         >
+                  <Image style={styles.itemImage}
+         source={{uri: "https://www.suedtirolerland.it/images/cms/100x100/1309185237D_IMG_6024_Brunnen_dreiQuellen.JPG"}}>
         </Image>
-        <View style={{ flex:1, justifyContent: 'center'}} >
-            <Text style= {{fontSize: 18}}>{item.properties.bezeichnung}</Text>
-            <Text>{item.properties.historisches_baujahr}</Text>
-            <Text>{item.properties.wasserart_txt}</Text>
-            <Text>{item.geometry.distance}</Text>
+        <View style={styles.itemText} >
+            <Text style={styles.nameText}>{item.properties.bezeichnung ? item.properties.bezeichnung : 'Brunnen'}</Text>
+            <Text style={styles.baujahrText}>{item.properties.historisches_baujahr ? item.properties.historisches_baujahr : 'Baujahr unbekannt'}</Text>
+            <Text style={[styles.wasserText, item.properties.wasserart_txt == 'Verteilnetz'  ? styles.verteilernetzText : styles.quellwasserText]}>
+                  {item.properties.wasserart_txt}
+            </Text>        
         </View>
+        <Text style={styles.abstandText}>{item.geometry.distance}m</Text>
+          <Image style={styles.iImage} source = {require('../assets/erweitern.png')} />
           </View>
           }
           keyExtractor={item => item.properties.objectid.toString()}
@@ -111,108 +118,88 @@ sortByDistance(array) {
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
-    marginTop: 50,
-    backgroundColor: '#F5FCFF',
   },
-  h2text: {
-    marginTop: 10,
-    fontFamily: 'Helvetica',
-    fontSize: 36,
+  itemImage: {
+    width:100, 
+    height: 100, 
+    borderBottomLeftRadius: 20, 
+    borderTopLeftRadius: 20
+  },
+  itemText: {
+    flex:1,
+    justifyContent: 'center', 
+    marginLeft: 10
+  },
+  hImage: {
+    width: 30, 
+    height: 30, 
+    marginLeft: 25 + '%',
+    marginTop: 25
+  },
+  iImage: {
+    width: 30, 
+    height: 30, 
+    tintColor: '#313131',
+    marginRight: 10,
+    maxWidth: 10
+  },
+  hText: {
+    fontFamily: 'Roboto',
+    fontSize: 30,
     fontWeight: 'bold',
+    marginLeft: 30 + '%',
+    color: 'white',
+    marginTop: 25,
+  },
+  abstandText: {
+    color: '#9E9E9E',
+    fontWeight: 'normal',
+    marginRight: 15,
+    marginTop: 50
+  },
+  nameText: {
+    fontFamily: 'Roboto',
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#313131'
+   
+  },
+  baujahrText: {
+    fontFamily: 'Roboto',
+    fontSize: 15,
+    fontWeight: '200',
+    color: '#313131'
+   
+  },
+  wasserText: {
+    fontFamily: 'Roboto',
+    fontSize: 15,
+    fontWeight: '100',
+ 
+  },
+  verteilernetzText: {
+    color: '#FF9100'
+  },
+  quellwasserText: {
+    color: '#199BFF'
+  },
+  tempNav: {
+    width: 100 + '%',
+    height: 74,
+    backgroundColor: '#6ACCFF',
+    justifyContent: 'center',
+    alignItems:'center',
+    flexDirection: 'row',
   },
   flatview: {
-    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
     flexDirection: 'row',
-    paddingTop: 30,
-    borderRadius: 2,
-  },
-  name: {
-    fontSize: 18
-  },
-  email: {
-    color: 'red'
-  },
-  developmentModeText: {
-    marginBottom: 20,
-    color: 'rgba(0,0,0,0.4)',
-    fontSize: 14,
-    lineHeight: 19,
-    textAlign: 'center',
-  },
-  contentContainer: {
-    paddingTop: 30,
-  },
-  welcomeContainer: {
-    alignItems: 'center',
-    marginTop: 10,
-    marginBottom: 20,
-  },
-  welcomeImage: {
-    width: 100,
-    height: 80,
-    resizeMode: 'contain',
-    marginTop: 3,
-    marginLeft: -10,
-  },
-  getStartedContainer: {
-    alignItems: 'center',
-    marginHorizontal: 50,
-  },
-  homeScreenFilename: {
-    marginVertical: 7,
-  },
-  codeHighlightText: {
-    color: 'rgba(96,100,109, 0.8)',
-  },
-  codeHighlightContainer: {
-    backgroundColor: 'rgba(0,0,0,0.05)',
-    borderRadius: 3,
-    paddingHorizontal: 4,
-  },
-  getStartedText: {
-    fontSize: 17,
-    color: 'rgba(96,100,109, 1)',
-    lineHeight: 24,
-    textAlign: 'center',
-  },
-  tabBarInfoContainer: {
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
-    ...Platform.select({
-      ios: {
-        shadowColor: 'black',
-        shadowOffset: { height: -3 },
-        shadowOpacity: 0.1,
-        shadowRadius: 3,
-      },
-      android: {
-        elevation: 20,
-      },
-    }),
-    alignItems: 'center',
-    backgroundColor: '#fbfbfb',
-    paddingVertical: 20,
-  },
-  tabBarInfoText: {
-    fontSize: 17,
-    color: 'rgba(96,100,109, 1)',
-    textAlign: 'center',
-  },
-  navigationFilename: {
-    marginTop: 5,
-  },
-  helpContainer: {
-    marginTop: 15,
-    alignItems: 'center',
-  },
-  helpLink: {
-    paddingVertical: 15,
-  },
-  helpLinkText: {
-    fontSize: 14,
-    color: '#2e78b7',
+    borderRadius: 21,
+    borderWidth: 1,
+    borderColor: '#6ACCFF',
+    marginTop : 15,
+    marginLeft: 5 + '%',
+    marginRight: 5 + '%'
   },
 });
